@@ -1,0 +1,21 @@
+{
+    "name": "papalardo/bot-conversa-api-client",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Papalardo\\BotConversaApiClient\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Pablo Papalardo",
+            "email": "pablopapalardo2@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^7.4",
+        "ext-curl": "*"
+    }
+}
