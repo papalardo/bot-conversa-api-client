@@ -23,4 +23,23 @@ class Str
     {
         return lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $s))));
     }
+
+    public static function isBrPhone($p): bool
+    {
+        return str_starts_with(static::formatPhone($p), '+55');
+    }
+
+    public static function hasBrNineDigit($p): bool
+    {
+        return strlen(static::formatPhone($p)) === 14 && strpos(static::formatPhone($p), '9');
+    }
+
+    public static function removeBrNineDigit($p): string
+    {
+        $phone = static::formatPhone($p);
+        if (static::isBrPhone($phone) && static::hasBrNineDigit($phone)) {
+            return substr($phone, 0, 5).substr($phone, 6);
+        }
+        return $phone;
+    }
 }

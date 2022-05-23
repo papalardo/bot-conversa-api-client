@@ -5,6 +5,8 @@ namespace Papalardo\BotConversaApiClient;
 use Papalardo\BotConversaApiClient\Contracts\IHttpClient;
 use Papalardo\BotConversaApiClient\Exceptions\BotConversaHttpException;
 use Papalardo\BotConversaApiClient\Exceptions\InvalidConfigurationException;
+use Papalardo\BotConversaApiClient\Exceptions\RecordNotFoundException;
+use Papalardo\BotConversaApiClient\Utils\Debug;
 
 class HttpClient implements IHttpClient
 {
@@ -57,30 +59,54 @@ class HttpClient implements IHttpClient
             CURLOPT_URL => $this->endpoint($path),
         ]);
 
+        Debug::varDump('CURL_OPTIONS', $curlOptions);
+
         curl_setopt_array($curl, $curlOptions);
 
         $response = curl_exec($curl);
 
-        $headerCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+        Debug::varDump('STATUS_CODE', $statusCode);
 
         curl_close($curl);
 
         $response = json_decode($response);
 
-        if ($headerCode >= 400) {
-            throw new BotConversaHttpException($response->error_message ?? '', $headerCode);
+        Debug::varDump('RESPONSE', $response);
+
+        if ($statusCode === 404) {
+            throw new RecordNotFoundException();
+        }
+
+        if ($statusCode >= 400) {
+            throw new BotConversaHttpException($response->error_message ?? '', $statusCode);
         }
 
         return (array) $response;
     }
 
-
-    public function get($path)
+    /**
+     * @param $path
+     * @return array
+     * @throws BotConversaHttpException
+     * @throws InvalidConfigurationException
+     * @throws RecordNotFoundException
+     */
+    public function get($path): array
     {
         return $this->request($path);
     }
 
-    public function post($path, array $payload)
+    /**
+     * @param $path
+     * @param array $payload
+     * @return array
+     * @throws BotConversaHttpException
+     * @throws InvalidConfigurationException
+     * @throws RecordNotFoundException
+     */
+    public function post($path, array $payload): array
     {
         return $this->request($path, [
             CURLOPT_POST => true,

@@ -23,9 +23,9 @@ Set configuration using singleton class:
 use Papalardo\BotConversaApiClient\BotConversaClientConfig;
 
 BotConversaClientConfig::i()
-    ->config([
-        'accessToken' => 'your-access-token'
-    ]);
+    ->accessToken('your-access-token')
+    ->debug() // To enable debug info
+    ;
 ```
 
 ## Available features

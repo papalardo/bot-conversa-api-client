@@ -8,21 +8,59 @@ class BotConversaClientConfig
 {
     use BeSingleton;
 
-    protected array $config = [];
+    protected array $config = [
+        'accessToken' => null,
+        'debug' => false,
+    ];
 
-    public function config(array $config)
+    /**
+     * @deprecated
+     * @param array $config
+     * @return $this
+     */
+    public function config(array $config = []): static
     {
         $this->config = $config;
+
+        return $this;
     }
 
-    public function isThrowable(): bool
+    /**
+     * @param string $accessToken
+     * @return $this
+     */
+    public function accessToken(string $accessToken): static
     {
-        return $this->config['throws'] ?? true;
+        $this->config['accessToken'] = $accessToken;
+
+        return $this;
     }
 
-    public function getAccessToken(): ?string
+    /**
+     * @param bool $enableDebug
+     * @return $this
+     */
+    public function debug(bool $enableDebug = true): static
     {
-        return $this->config['accessToken'] ?? null;
+        $this->config['debug'] = $enableDebug;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAccessToken(): string
+    {
+        return $this->config['accessToken'];
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDebugging(): bool
+    {
+        return $this->config['debug'];
     }
 
 }

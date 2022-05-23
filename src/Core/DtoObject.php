@@ -2,6 +2,7 @@
 
 namespace Papalardo\BotConversaApiClient\Core;
 
+use Papalardo\BotConversaApiClient\Utils\Arr;
 use Papalardo\BotConversaApiClient\Utils\Str;
 
 class DtoObject
@@ -39,10 +40,15 @@ class DtoObject
 
     private function arrayToSnakeCase(array $values): array
     {
-        $keys = array_map(function($key) {
+        return Arr::transformKeys($values, function($key) {
             return Str::toSnake($key);
-        }, array_keys($values));
+        });
+    }
 
-        return array_combine($keys, $values);
+    public function __debugInfo()
+    {
+        return Arr::transformKeys($this->toArray(false), function($key) {
+            return "#$key";
+        });
     }
 }
