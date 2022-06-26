@@ -2,7 +2,9 @@
 
 namespace Papalardo\BotConversaApiClient;
 
+use Papalardo\BotConversaApiClient\Modules\Flows\FlowsService;
 use Papalardo\BotConversaApiClient\Modules\Subscriber\SubscriberService;
+use Papalardo\BotConversaApiClient\Modules\Subscribers\SubscribersService;
 
 class BotConversaClient
 {
@@ -23,5 +25,15 @@ class BotConversaClient
     public function subscriber(): SubscriberService
     {
         return new SubscriberService($this->client);
+    }
+
+    public function flows(): FlowsService
+    {
+        return new FlowsService($this->client);
+    }
+
+    public function subscribers(): SubscribersService
+    {
+        return new SubscribersService($this->client);
     }
 }

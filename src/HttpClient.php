@@ -3,6 +3,7 @@
 namespace Papalardo\BotConversaApiClient;
 
 use Papalardo\BotConversaApiClient\Contracts\IHttpClient;
+use Papalardo\BotConversaApiClient\Core\Response;
 use Papalardo\BotConversaApiClient\Exceptions\BotConversaHttpException;
 use Papalardo\BotConversaApiClient\Exceptions\InvalidConfigurationException;
 use Papalardo\BotConversaApiClient\Exceptions\RecordNotFoundException;
@@ -30,15 +31,25 @@ class HttpClient implements IHttpClient
         return $this->accessToken;
     }
 
-    private function endpoint(string $path): string
+    private function endpoint(string $path, array $params = []): string
     {
-        return $this->getBaseUrl() . '/' . trim($path, '/') . '/';
+        $url = $this->getBaseUrl() . '/' . trim($path, '/') . '/';
+
+        if (count($params) > 0) {
+            $url .= '?'.http_build_query($params);
+        }
+
+        return $url;
     }
 
-    private function request(string $path, array $curlOptions = []): array
+    private function request(string $path, array $options = []): Response
     {
+        $curlOptions = $options['curl'] ?? [];
+
+        $pendingRequest = new Response();
+
         if (is_null($this->getAccessToken())) {
-            throw new InvalidConfigurationException('Access Token cannot be empty');
+            return $pendingRequest->setException(new InvalidConfigurationException('Access Token cannot be empty'));
         }
 
         $curl = curl_init();
@@ -56,7 +67,7 @@ class HttpClient implements IHttpClient
             CURLOPT_CONNECTTIMEOUT => 30,
             CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTPHEADER => $headers,
-            CURLOPT_URL => $this->endpoint($path),
+            CURLOPT_URL => $this->endpoint($path, $options['params'] ?? []),
         ]);
 
         Debug::varDump('CURL_OPTIONS', $curlOptions);
@@ -71,46 +82,40 @@ class HttpClient implements IHttpClient
 
         curl_close($curl);
 
-        $response = json_decode($response);
+        $response = json_decode($response, true);
 
         Debug::varDump('RESPONSE', $response);
 
-        if ($statusCode === 404) {
-            throw new RecordNotFoundException();
-        }
-
-        if ($statusCode >= 400) {
-            throw new BotConversaHttpException($response->error_message ?? '', $statusCode);
-        }
-
-        return (array) $response;
+        return $pendingRequest
+            ->setStatusCode($statusCode)
+            ->setErrorMessage($response->error_message ?? null)
+            ->setBody($response);
     }
 
     /**
      * @param $path
-     * @return array
-     * @throws BotConversaHttpException
-     * @throws InvalidConfigurationException
-     * @throws RecordNotFoundException
+     * @param array $params
+     * @return Response
      */
-    public function get($path): array
+    public function get($path, array $params = []): Response
     {
-        return $this->request($path);
+        return $this->request($path, [
+            'params' => $params
+        ]);
     }
 
     /**
      * @param $path
      * @param array $payload
-     * @return array
-     * @throws BotConversaHttpException
-     * @throws InvalidConfigurationException
-     * @throws RecordNotFoundException
+     * @return Response
      */
-    public function post($path, array $payload): array
+    public function post($path, array $payload): Response
     {
         return $this->request($path, [
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $payload,
+            'curl' => [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $payload,
+            ]
         ]);
     }
 }

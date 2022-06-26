@@ -4,6 +4,7 @@ namespace Papalardo\BotConversaApiClient\Core;
 
 use Papalardo\BotConversaApiClient\Utils\Arr;
 use Papalardo\BotConversaApiClient\Utils\Str;
+use stdClass;
 
 class DtoObject
 {
@@ -27,7 +28,11 @@ class DtoObject
         }
     }
 
-    public function toArray($snakable = true): array
+    /**
+     * @param bool $snakable
+     * @return array
+     */
+    public function toArray(bool $snakable = true): array
     {
         $values = get_object_vars($this);
 
@@ -36,6 +41,15 @@ class DtoObject
         }
 
         return $values;
+    }
+
+    /**
+     * @param bool $snakable
+     * @return stdClass
+     */
+    public function toObject(bool $snakable = true): stdClass
+    {
+        return (object) $this->toArray($snakable);
     }
 
     private function arrayToSnakeCase(array $values): array
