@@ -89,7 +89,7 @@ class SubscriberService extends BaseService
     public function sendMessage(int|string $subscriberPhoneOrId, SendMessageData $data): Response
     {
         return $this->proxyUsingIdOrPhone($subscriberPhoneOrId, function(int $subscriberId) use ($data) {
-            $response = $this->httpClient
+            return $this->httpClient
                 ->post("/subscriber/$subscriberId/send_message", $data->toArray())
                 ->setBody(fn ($response) => $response->ok());
         }, false);
